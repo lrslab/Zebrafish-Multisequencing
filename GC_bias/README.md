@@ -148,8 +148,8 @@ Then we can found that most of bins were distributed from 10% to 60% GC content.
 
 ```shell
 #get the overall average read coverage at GC content from 10 to 60%
-grep SRR12173563 out.bed  | awk '{if($1>=10)print $0}' | awk '{if($1<=60) print $0}' | awk '{sum += $3}END{print sum/NR}'#6.13522
-grep SRR12173564 out.bed  | awk '{if($1>=10)print $0}' | awk '{if($1<=60) print $0}' | awk '{sum += $3}END{print sum/NR}'#9.15549
+grep SRR12173563 out.bed  | awk '{if($1>=10)print $0}' | awk '{if($1<=60) print $0}' | awk '{sum += $3}END{print sum/NR}' #6.13522
+grep SRR12173564 out.bed  | awk '{if($1>=10)print $0}' | awk '{if($1<=60) print $0}' | awk '{sum += $3}END{print sum/NR}' #9.15549
 grep km1 out.bed  | awk '{if($1>=10)print $0}' | awk '{if($1<=60) print $0}' | awk '{sum += $3}END{print sum/NR}' #7.76684
 grep km2 out.bed  | awk '{if($1>=10)print $0}' | awk '{if($1<=60) print $0}' | awk '{sum += $3}END{print sum/NR}' #7.65381
 
