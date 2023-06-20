@@ -1,8 +1,10 @@
-**The pipeline for how to calculate the GC bias of sequencing reads.**
+## Pipeline for Calculating and Normalizing GC Bias in Sequencing Reads
+
+### GC content for bin
 
 Firstly, we need to select the bin size, the length of bin, to calculate the GC content. Here, we chose the 1 Kbp for zebrafish with approximately 1.6 Gbp genome size.
 
-The following commands can help you split the genome into 1k bin and put the position to a bed file.
+To split the genome into 1k bins and generate a BED file containing their positions, use the following commands:
 
 ```shell
 samtools faidx GRCz11.fa 
@@ -16,9 +18,10 @@ the demo for bed file:
 NC_007112.7	0	1000
 NC_007112.7	1000	2000
 NC_007112.7	2000	3000
+...
 ```
 
-Then to get the GC content for each bin, this can help you.
+To calculate the GC content for each bin in the BED file, use the following command:
 
 ```shell
 bedtools nuc -fi GRCz11.fa -bed zf_1k.bed > zf_1k.tmp.txt
@@ -31,6 +34,7 @@ the demo for result:
 NC_007112.7	0	1000	0.594000	0.406000	303	207	199	291	0	0	1000
 NC_007112.7	1000	2000	0.597000	0.403000	308	182	221	289	0	0	1000
 NC_007112.7	2000	3000	0.610000	0.390000	309	186	204	301	0	0	1000
+...
 ```
 
 here, we only need the GC content.
@@ -39,7 +43,7 @@ here, we only need the GC content.
 grep -v "#" zf_1k.tmp.txt | awk '{print $1 "\t" $2 "\t" $3 "\t" $5}' > zf_1k.GC.info
 ```
 
-the demo for this:
+the demo for result:
 
 ```shell
 #chr	start	end	GC
@@ -47,7 +51,12 @@ NC_007112.7	0	1000	0.406000
 NC_007112.7	1000	2000	0.403000
 NC_007112.7	2000	3000	0.390000
 NC_007112.7	3000	4000	0.368000
+...
 ```
+
+
+
+### Read coverage for bin
 
 After get the GC content for each bin, we need to think how to get the read coverage of datasets for these bins. All the datasets need to be aligned with the reference and get the bam files.
 
@@ -77,9 +86,12 @@ NC_007112.7	2000	3000	11.233
 NC_007112.7	3000	4000	14.425
 NC_007112.7	4000	5000	12.654
 NC_007112.7	5000	6000	5.145
+...
 ```
 
-Then we need to merge the files of read coverage and GC content based on the position.
+
+
+Next, we need to merge the files of read coverage and GC content based on the position.
 
 ```shell
 GC	SRR12173563	SRR12173564	km1	km2
@@ -88,9 +100,12 @@ GC	SRR12173563	SRR12173564	km1	km2
 39	11.233	18.699	5.763	8.551
 36.8	14.425	22.258	4.601	9
 35.2	12.654	19.608	5.679	9.751
+...
 ```
 
-The following python script can help to calculate the read coverage and counted number at different GC content.
+
+
+To calculate the read coverage and count the number of reads at different GC content, use the following Python script:
 
 ```python
 # the GC content belong to [12.5, 13.5) was regard as 13.
@@ -109,7 +124,7 @@ for i in range(0,101):
     print(str(i) + "\tcount\t" + str(len(tmp)))
 ```
 
-The demo for result:
+The demo for results:
 
 ```shell
 #GC	type	value
@@ -122,7 +137,10 @@ The demo for result:
 1	km2	3.0680909090909094
 1	SRR12173563	0.45972727272727276
 1	SRR12173564	0.6091818181818182
+...
 ```
+
+
 
 Then we can plot the distribution of counted number for each GC content with R.
 
@@ -140,9 +158,9 @@ ggplot(GC_distribution,aes(x=GC, y=number/1e+5)) +
           axis.title=element_text(size=12, colour = "black"))
 ```
 
-The demo of figure
-
 ![alt text](demo_1.png)
+
+
 
 Then we can found that most of bins were distributed from 10% to 60% GC content. so we only calculated the relationship between GC content and read coverage among these.  We normalized the read coverage by dividing the coverage of each GC content level within this range by the overall average read coverage.
 
@@ -160,6 +178,29 @@ grep km1 out.bed  | awk '{if($1>=10)print $0}' | awk '{if($1<=60) print $0}' | a
 grep km2 out.bed  | awk '{if($1>=10)print $0}' | awk '{if($1<=60) print $0}' | awk '{print$1"\t"$2"\t"$3/7.65381}' >> nor.bed
 ```
 
+
+
+The demo for results:
+
+```shell
+GC      type    value
+10      SRR12173563     0.960485
+11      SRR12173563     1.00276
+12      SRR12173563     1.0645
+13      SRR12173563     1.27547
+14      SRR12173563     1.2873
+15      SRR12173563     1.33536
+16      SRR12173563     1.35933
+17      SRR12173563     1.43405
+18      SRR12173563     1.44074
+19      SRR12173563     1.48228
+20      SRR12173563     1.4586
+21      SRR12173563     1.47623
+22      SRR12173563     1.43944
+23      SRR12173563     1.43714
+...
+```
+
 The R code for plotting.
 
 ```R
@@ -175,7 +216,5 @@ ggplot(df, aes(x=GC, y=value, color=type)) + theme_bw() +
           legend.text = element_text(size=12,colour = "black"),
           legend.position = "bottom")
 ```
-
-The demo of figure
 
 ![alt text](demo_2.png)
