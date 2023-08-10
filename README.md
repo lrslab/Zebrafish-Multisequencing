@@ -5,7 +5,7 @@ Open Repository of Scripts and Resources for Nanopore R9.4.1 data of  kidney mar
 
 **Quick links:**
 
--  The published paper featuring the presented results can be access here.
+-  The published paper featuring the presented results can be access [here](https://www.nature.com/articles/s41597-023-02431-5).
 
 - The raw data in *fastq* and methylation bam files of KM are available [here](https://www.ncbi.nlm.nih.gov/biosample/33059893).
 - The raw data in *fastq* and methylation bam files of KMB are available [here](https://www.ncbi.nlm.nih.gov/biosample/33059892).
